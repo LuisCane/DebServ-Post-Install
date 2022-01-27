@@ -23,7 +23,7 @@ Greeting () {
     printf '\nWelcome to my post installation script for Pop!_OS'
     sleep 1s
     printf '\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\n
-This script contains functions that require root privilages.\n'
+This script contains functions that require root privilages If you are not root, run this script with sudo.\n'
     sleep 3s
     while true; do
         read -p $'Do you wish to proceed? [y/N]' yn
@@ -41,7 +41,7 @@ Update () {
         read -p $'Would you like to update the repositories? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) sudo apt update; check_exit_status; break;;
+            [Yy]* ) apt update; check_exit_status; break;;
             [Nn]* ) break;;
             * ) echo 'Please answer yes or no.';;
         esac
@@ -51,7 +51,8 @@ Update () {
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) apt-pkg-upgrade;
-                    check_exit_status;;
+                    check_exit_status
+                    break;;
             [Nn]* ) break;;
             * ) echo 'Please answer yes or no.';;
         esac
@@ -60,9 +61,9 @@ Update () {
         read -p $'Would you like to update the firmware? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) sudo fwupdmgr get-devices;
+            [Yy]* ) fwupdmgr get-devices;
                     check_exit_status;
-                    sudo fwupdmgr get-updates;
+                    fwupdmgr get-updates;
                     check_exit_status;
                     return 0;;
             [Nn]* ) break;;
@@ -72,29 +73,30 @@ Update () {
 }
 #upgrade Apt Packages
 apt-pkg-upgrade () {
-    printf '\nsudo apt -y upgrade\n'
-    sudo apt -y upgrade --allow-downgrades;
+    printf '\napt -y upgrade\n'
+    apt -y upgrade --allow-downgrades;
     check_exit_status
-    printf '\nsudo apt -y dist-upgrade\n'
-    sudo apt -y dist-upgrade;
+    printf '\napt -y dist-upgrade\n'
+    apt -y dist-upgrade;
     check_exit_status
-    printf '\nsudo apt -y autoremove\n'
-    sudo apt -y autoremove;
+    printf '\napt -y autoremove\n'
+    apt -y autoremove;
     check_exit_status
-    printf '\nsudo apt -y autoclean\n'
-    sudo apt -y autoclean;
+    printf '\napt -y autoclean\n'
+    apt -y autoclean;
     check_exit_status
 }
 #Install VIM
 InstallVIM () {
-    printf '\nWould you like to install VIM?\n'
+    printf '\nWould you like to install VIM? [y/n]'
     read -r yn
     case $yn in
         [Yy]* ) printf '\nInstalling VIM\n'
-                sudo apt install -y vim
-                ;;
+                apt install -y vim
+                check_exit_status;
+                return 0;;
         [Nn]* ) printf '\nSkipping VIM'
-                ;;
+                return 0;;
             * ) printf '\nPlease enter yes or no.\n'
                 ;;
     esac
@@ -107,7 +109,7 @@ ChHostname () {
         yn=${yn:-N}
         case $yn in
             [Yy]* ) read -p "Please enter a new Hostname: " NEWHOSTNAME;
-                    sudo hostnamectl set-hostname $NEWHOSTNAME
+                    hostnamectl set-hostname $NEWHOSTNAME
                     return 0;;
             [Nn]* ) echo
                     printf '\nHostname %s will not be changed.\n' $HOSTNAME ;
@@ -139,24 +141,27 @@ SSHKeyGen () {
     done
 }
 #Copy bashrc and vimrc to home folder
-CPbashrc () {
+Copybashrc () {
     while true; do 
         read -p 'Would you like to copy the bashrc file included with this script to your home folder? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) cp ./home/user/bashrc ~/.bashrc;;
+            [Yy]* ) cp ./home/user/bashrc ~/.bashrc
+            check_exit_status;
+            break;;
             [Nn]* ) printf '\nOK\n'
                     break;;
                 * ) echo 'Please answer yes or no.';;
         esac
     done
 }
-CPvimrc ()  {
+Copyvimrc ()  {
     while true; do 
     read -p 'Would you like to copy the vimrc file included with this script to your home folder? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) cp ./home/user/vimrc ~/.vimrc
+                    check_exit_status;
                     break;;
             [Nn]* ) printf '\nOK\n'
                     break;;
@@ -182,17 +187,17 @@ ConfigYubikeys () {
 }
 #Install Yubico Software
 InstallYubiSW () {
-    printf '\nsudo apt install -y libpam-yubico\n'
-    sudo apt install -y libpam-yubico;
+    printf '\napt install -y libpam-yubico\n'
+    apt install -y libpam-yubico;
     check_exit_status
-    printf '\nsudo apt install -y libpam-u2f\n'
-    sudo apt install -y libpam-u2f;
+    printf '\napt install -y libpam-u2f\n'
+    apt install -y libpam-u2f;
     check_exit_status
-    printf '\nsudo apt install -y yubikey-manager\n'
-    sudo apt install -y yubikey-manager;
+    printf '\napt install -y yubikey-manager\n'
+    apt install -y yubikey-manager;
     check_exit_status
-    printf '\nsudo apt install -y yubikey-personalization\n'
-    sudo apt install -y yubikey-personalization;
+    printf '\napt install -y yubikey-personalization\n'
+    apt install -y yubikey-personalization;
     check_exit_status
 }
 #Setup Yubikey OTP Authentication
@@ -223,32 +228,32 @@ CreateYubikeyOTP () {
 }
 #Copy and move Yubikey files to apropriate locations
 CPYubikeyFiles () {
-    printf "sudo mkdir -p /var/yubico\n"
-    sudo mkdir -p /var/yubico
-    printf "sudo chown root:root /var/yubico\n"
-    sudo chown root:root /var/yubico
-    printf "sudo chmod 766 /var/yubico\n"
-    sudo chmod 766 /var/yubico
-    printf "sudo cp ./authorized_yubikeys /var/yubico/authorized_yubikeys\n"
-    sudo cp ./authorized_yubikeys /var/yubico/authorized_yubikeys
+    printf "mkdir -p /var/yubico\n"
+    mkdir -p /var/yubico
+    printf "chown root:root /var/yubico\n"
+    chown root:root /var/yubico
+    printf "chmod 766 /var/yubico\n"
+    chmod 766 /var/yubico
+    printf "cp ./authorized_yubikeys /var/yubico/authorized_yubikeys\n"
+    cp ./authorized_yubikeys /var/yubico/authorized_yubikeys
     for i in ~/.yubico/*; do
         printf "cp $i $(echo $i | sed "s/challenge/$USER/")\n"
         cp $i $(echo $i | sed "s/challenge/$USER/")
-        printf "sudo mv ~/.yubico/$USER* /test/var/yubico/\n"
-        sudo mv ~/.yubico/$USER* /test/var/yubico/
-        printf "sudo chown root:root /test/var/yubico/*\n"
-        sudo chown root:root /test/var/yubico/*
-        printf "sudo chmod 600 /test/var/yubico/*\n"
-        sudo chmod 600 /test/var/yubico/*
+        printf "mv ~/.yubico/$USER* /test/var/yubico/\n"
+        mv ~/.yubico/$USER* /test/var/yubico/
+        printf "chown root:root /test/var/yubico/*\n"
+        chown root:root /test/var/yubico/*
+        printf "chmod 600 /test/var/yubico/*\n"
+        chmod 600 /test/var/yubico/*
     done
-    printf "sudo chmod 700 /var/yubico"
-    sudo chmod 700 /var/yubico
-    printf "sudo cp ./pam.d/yubikey /etc/pam.d/yubikey"
-    sudo cp ./pam.d/yubikey /etc/pam.d/yubikey
-    printf "sudo cp ./pam.d/yubikey-sudo /etc/pam.d/yubikey-sudo"
-    sudo cp ./pam.d/yubikey-sudo /etc/pam.d/yubikey-sudo
-    printf "sudo cp ./pam.d/yubikey-pin /etc/pam.d/yubikey-pin"
-    sudo cp ./pam.d/yubikey-pin /etc/pam.d/yubikey-pin
+    printf "chmod 700 /var/yubico"
+    chmod 700 /var/yubico
+    printf "cp ./pam.d/yubikey /etc/pam.d/yubikey"
+    cp ./pam.d/yubikey /etc/pam.d/yubikey
+    printf "cp ./pam.d/yubikey-/etc/pam.d/yubikey-sudo"
+    cp ./pam.d/yubikey-/etc/pam.d/yubikey-sudo
+    printf "cp ./pam.d/yubikey-pin /etc/pam.d/yubikey-pin"
+    cp ./pam.d/yubikey-pin /etc/pam.d/yubikey-pin
     printf "\nAdd 'include' statements to pam auth files to specify your security preferences."
     sleep 3s
 
@@ -269,7 +274,7 @@ InstallSW () {
 
 }
 InstallAptSW() {
-    printf 'Installing Apt Packages'
+    printf '\nInstalling Apt Packages\n'
     sleep 1s
   file='./apps/apt-apps'
 
@@ -279,8 +284,8 @@ InstallAptSW() {
     read -r yn
     yn=${yn:-Y}
     case $yn in
-      [Yy]*) echo sudo apt install -y "$line" 
-            sudo apt install -y "$line"
+      [Yy]*) echo apt install -y "$line" 
+            apt install -y "$line"
             check_exit_status
             ;;
       [Nn]*) printf '\nSkipping %s\n' "$line";;
@@ -323,9 +328,9 @@ ChHostname
 
 SSHKeyGen
 
-CPbashrc
+Copybashrc
 
-CPvimrc
+Copyvimrc
 
 ConfigYubikeys
 

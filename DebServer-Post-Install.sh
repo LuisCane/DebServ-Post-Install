@@ -17,33 +17,6 @@
 #       openssh-server
 #Part 5 - Reminder of additional setup   
 
-if Greeting; then
-    STR=$'\nProceeding\n'
-    echo "$STR"
-else
-    printf "\nGoodbye\n"; exit
-fi
-
-Update
-
-InstallVIM
-
-InstallSpiceVDAgent
-
-InstallRefind
-
-ChHostname
-
-SSHKeyGen
-
-CPbashrc
-
-CPvimrc
-
-ConfigYubikeys
-
-InstallSW
-
 Greeting () {
     printf '\nHello!'
     sleep 1s

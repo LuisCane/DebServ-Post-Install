@@ -22,8 +22,8 @@ Greeting () {
     sleep 1s
     printf '\nWelcome to my post installation script for Pop!_OS'
     sleep 1s
-    printf '\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\n
-This script contains functions that require root privilages If you are not root, run this script with sudo.\n'
+    printf printf '\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\n
+This script contains functions that require root privilages and is intended to run as root or with sudo. Running this script without root privilage will result in errors.\n'
     sleep 3s
     while true; do
         read -p $'Do you wish to proceed? [y/N]' yn
@@ -85,6 +85,21 @@ apt-pkg-upgrade () {
     printf '\napt -y autoclean\n'
     apt -y autoclean;
     check_exit_status
+}
+#Install Sudo
+InstallSudo () {
+    printf '\nWould you like to install sudo [y/n]'
+    read -r yn
+    case $yn in
+        [Yy]* ) printf '\nInstalling sudo\n'
+                apt install -y sudo
+                check_exit_status;
+                return 0;;
+        [Nn]* ) printf '\nSkipping sudo'
+                return 0;;
+            * ) printf '\nPlease enter yes or no.\n'
+                ;;
+    esac
 }
 #Install VIM
 InstallVIM () {
@@ -321,8 +336,9 @@ fi
 
 Update
 
-InstallVIM
+InstallSudo
 
+InstallVIM
 
 ChHostname
 

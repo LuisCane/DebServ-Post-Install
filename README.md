@@ -1,4 +1,7 @@
 # DebServ-post-install
+Cat: General
+
+NOTE: This script is no longer updated and is deprecated in favor of https://github.com/LuisCane/Debian-Post-Install which provides more features and combines the functinos of this script and the desktop post install script.
 Script to perform common tasks after installation of Debian based servers
 
 The script will perform the following tasks:
